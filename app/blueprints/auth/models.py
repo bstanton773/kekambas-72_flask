@@ -30,3 +30,7 @@ class User(db.Model, UserMixin):
             'email': self.email
         }
         return user_dict
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
