@@ -1,14 +1,23 @@
 from . import bp as api
-
+from app.blueprints.auth.models import User
+from flask import jsonify
 
 @api.route('/users')
 def get_users():
-    pass
+    """
+    [GET] /api/users - Returns all users
+    """
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users])
 
 
 @api.route('/users/<id>')
 def get_user(id):
-    pass
+    """
+    [GET] /api/users/<id> - Return user based on id
+    """
+    user = User.query.get_or_404(id)
+    return jsonify(user.to_dict())
 
 
 @api.route('/users', methods=['POST'])
