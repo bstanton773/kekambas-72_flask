@@ -1,6 +1,16 @@
 from . import bp as api
 from app.blueprints.auth.models import User
+from app.blueprints.blog.models import Post
 from flask import jsonify, request
+from .auth import basic_auth
+
+
+@api.route('/token', methods=['POST'])
+@basic_auth.login_required
+def get_token():
+    token = basic_auth.current_user().get_token()
+    return jsonify({'token': token})
+
 
 @api.route('/users')
 def get_users():
