@@ -34,3 +34,13 @@ class User(db.Model, UserMixin):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+
+    def update_user(self, data):
+        for field in data:
+            if field in {'username', 'email', 'password'}:
+                if field == 'password':
+                    setattr(self, field, generate_password_hash(data[field]))
+                else:
+                    setattr(self, field, data[field])
+        db.session.commit()

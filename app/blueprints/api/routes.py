@@ -46,7 +46,10 @@ def create_user():
 
 @api.route('/users/<id>', methods=['PUT'])
 def update_user(id):
-    pass
+    user = User.query.get_or_404(id)
+    data = request.json
+    user.update_user(data)
+    return jsonify(user.to_dict())
 
 
 @api.route('/users/<id>', methods=['DELETE'])
