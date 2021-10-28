@@ -1,5 +1,5 @@
 from . import bp as auth
-from app import db, mail
+from app import db
 from flask import render_template, flash, redirect, url_for
 from flask_login import login_user, logout_user, login_required
 from flask_mail import Message
@@ -33,12 +33,12 @@ def register():
         # Flash a success message thanking them for signing up
         flash(f'Thank you {username}, you have succesfully registered!', 'success')
 
-        # Create Welcome Email to new user
-        welcome_message = Message('Welcome to the Kekambas Blog!', [email])
-        welcome_message.body = f'Dear {username}, Thank you for signing up for our blog. We are so excited to have you.'
+        # # Create Welcome Email to new user
+        # welcome_message = Message('Welcome to the Kekambas Blog!', [email])
+        # welcome_message.body = f'Dear {username}, Thank you for signing up for our blog. We are so excited to have you.'
 
-        # Send Welcome Email
-        mail.send(welcome_message)
+        # # Send Welcome Email
+        # mail.send(welcome_message)
 
         # Redirecting to the home page
         return redirect(url_for('index'))
