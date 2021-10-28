@@ -2,7 +2,7 @@ from . import bp as api
 from app.blueprints.auth.models import User
 from app.blueprints.blog.models import Post
 from flask import jsonify, request
-from .auth import basic_auth
+from .auth import basic_auth, token_auth
 
 
 # Token Route
@@ -10,7 +10,8 @@ from .auth import basic_auth
 @api.route('/token', methods=['POST'])
 @basic_auth.login_required
 def get_token():
-    token = basic_auth.current_user().get_token()
+    verified_user = basic_auth.current_user()
+    token = verified_user.get_token()
     return jsonify({'token': token})
 
 
@@ -58,16 +59,24 @@ def create_user():
     return jsonify(new_user.to_dict()), 201
 
 
-@api.route('/users/<id>', methods=['PUT'])
+@api.route('/users/<int:id>', methods=['PUT'])
+@token_auth.login_required
 def update_user(id):
+    current_user = token_auth.current_user()
+    if current_user.id != id:
+        return jsonify({'error': 'You do not have access to update this user'}), 403
     user = User.query.get_or_404(id)
     data = request.json
     user.update_user(data)
     return jsonify(user.to_dict())
 
 
-@api.route('/users/<id>', methods=['DELETE'])
+@api.route('/users/<int:id>', methods=['DELETE'])
+@token_auth.login_required
 def delete_user(id):
+    current_user = token_auth.current_user()
+    if current_user.id != id:
+        return jsonify({'error': 'You do not have access to delete this user'}), 403
     user_to_delete = User.query.get_or_404(id)
     user_to_delete.delete()
     return jsonify({}), 204
@@ -91,6 +100,7 @@ def get_post(id):
 
 
 @api.route('/posts', methods=['POST'])
+@token_auth.login_required
 def create_post():
     data = request.json
     for field in ['title', 'content', 'user_id']:
@@ -105,17 +115,25 @@ def create_post():
     return jsonify(new_post.to_dict()), 201
 
 
-@api.route('/posts/<id>', methods=['PUT'])
+@api.route('/posts/<int:id>', methods=['PUT'])
+@token_auth.login_required
 def update_post(id):
     post_to_update = Post.query.get_or_404(id)
+    current_user = token_auth.current_user()
+    if post_to_update.author.id != current_user.id:
+        return jsonify({'error': 'You do not have access to update this post'}), 403
     update_data = request.json
     post_to_update.update_post(update_data)
     return jsonify(post_to_update.to_dict())
 
 
-@api.route('/posts/<id>', methods=['DELETE'])
+@api.route('/posts/<int:id>', methods=['DELETE'])
+@token_auth.login_required
 def delete_post(id):
     post_to_delete = Post.query.get_or_404(id)
+    current_user = token_auth.current_user()
+    if post_to_delete.author.id != current_user.id:
+        return jsonify({'error': 'You do not have access to delete this post'}), 403
     post_to_delete.delete()
     return jsonify({}), 204
 
